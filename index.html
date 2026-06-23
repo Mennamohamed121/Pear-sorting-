@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pear Sorting Factory - Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="login-gate" class="login-overlay">
+    <div class="login-box">
+        <div class="login-header">
+            <i data-lucide="lock" class="lock-icon"></i>
+            <h2>OPERATOR AUTHENTICATION</h2>
+            <p>Authorized personnel only. Please enter credentials.</p>
+        </div>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="username">Operator Username</label>
+                <input type="text" id="username" required placeholder="e.g., operator_01">
+            </div>
+            <div class="input-group">
+                <label for="password">Security PIN / Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+            <div id="login-error" class="error-msg">❌ Invalid Operator Credentials</div>
+            <button type="submit" class="login-btn">ACCESS DASHBOARD</button>
+        </form>
+    </div>
+</div>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-area">
+                <i data-lucide="factory" class="logo-icon"></i>
+                <div class="logo-text">
+                    <h2>Smart Pear sorting line </h2>
+                    <p class="live-indicator"><span class="dot pulse-green"></span> LIVE</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="#" class="nav-item"><i data-lucide="bar-chart-3"></i> Analytics</a>
+                <a href="#" class="nav-item"><i data-lucide="eye"></i> Vision System</a>
+                <a href="#" class="nav-item"><i data-lucide="activity"></i> Motor Health</a>
+                <a href="#" class="nav-item"><i data-lucide="bell"></i> Alarms</a>
+                <a href="#" class="nav-item"><i data-lucide="file-text"></i> Reports</a>
+                <a href="#" class="nav-item"><i data-lucide="settings"></i> Settings</a>
+            </nav>
+
+            <div class="system-status">
+                <h3>SYSTEM STATUS</h3>
+                <div class="status-row"><span>ESP32</span> <span class="status-badge online">ONLINE</span></div>
+                <div class="status-row"><span>Node-RED</span> <span class="status-badge online">ONLINE</span></div>
+                <div class="status-row"><span>InfluxDB</span> <span class="status-badge online">ONLINE</span></div>
+                <div class="status-row"><span>Dashboard</span> <span class="status-badge online">ONLINE</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="time-stamp">
+                    <i data-lucide="clock"></i> <span id="live-time">11:24:38 AM</span>
+                    <i data-lucide="calendar" style="margin-left: 20px;"></i> <span id="live-date">May 16, 2025</span>
+                </div>
+                <div class="notification-bell">
+                    <i data-lucide="bell"></i>
+                    <span class="bell-badge">3</span>
+                </div>
+            </header>
+
+            <section class="kpi-grid">
+                <div class="kpi-card card-health">
+                    <div class="kpi-icon"><i data-lucide="shield-check"></i></div>
+                    <div class="kpi-info">
+                        <h3>FACTORY HEALTH</h3>
+                        <p class="kpi-value color-green" id="kpi-health">100%</p>
+                        <p class="kpi-sub">All Systems Normal</p>
+                    </div>
+                </div>
+                <div class="kpi-card card-oee">
+                    <div class="kpi-icon"><i data-lucide="pie-chart"></i></div>
+                    <div class="kpi-info">
+                        <h3>OEE</h3>
+                        <p class="kpi-value color-green" id="kpi-oee">92%</p>
+                        <p class="kpi-sub">Target: 85%</p>
+                    </div>
+                </div>
+                <div class="kpi-card card-energy">
+                    <div class="kpi-icon"><i data-lucide="zap"></i></div>
+                    <div class="kpi-info">
+                        <h3>ENERGY</h3>
+                        <p class="kpi-value color-yellow" id="kpi-energy">3.2 <span class="unit">kW</span></p>
+                        <p class="kpi-sub">Today: <span id="kpi-energy-total">76.8</span> kWh</p>
+                    </div>
+                </div>
+                <div class="kpi-card card-throughput">
+                    <div class="kpi-icon"><i data-lucide="trending-up"></i></div>
+                    <div class="kpi-info">
+                        <h3>THROUGHPUT</h3>
+                        <p class="kpi-value color-green" id="kpi-throughput">250 <span class="unit">pears/min</span></p>
+                        <p class="kpi-sub">Today: <span id="kpi-throughput-total">18,750</span> pears</p>
+                    </div>
+                </div>
+                <div class="kpi-card card-defect">
+                    <div class="kpi-icon"><i data-lucide="target"></i></div>
+                    <div class="kpi-info">
+                        <h3>DEFECT RATE</h3>
+                        <p class="kpi-value color-red" id="kpi-defect">2.4%</p>
+                        <p class="kpi-sub">Target: &lt; 5%</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="digital-twin-panel">
+                <div class="panel-header">
+                    <h2>DIGITAL TWIN – PEAR SORTING LINE</h2>
+                    <div class="legend">
+                        <span class="legend-item"><span class="dot dot-green"></span> Running</span>
+                        <span class="legend-item"><span class="dot dot-yellow"></span> Warning</span>
+                        <span class="legend-item"><span class="dot dot-red"></span> Alarm</span>
+                        <span class="legend-item"><span class="dot dot-gray"></span> Offline</span>
+                    </div>
+                </div>
+
+                <div class="flowchart-container">
+                    <div class="flow-node" id="node-loading">
+                        <i data-lucide="box"></i>
+                        <div>
+                            <h4>LOADING</h4>
+                            <span class="node-status running">RUNNING</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow-down"></div>
+
+                    <div class="flow-node" id="node-vision">
+                        <i data-lucide="camera"></i>
+                        <div>
+                            <h4>VISION AI</h4>
+                            <span class="node-status running">RUNNING</span>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow-down"></div>
+
+                    <div class="flow-node" id="node-after-vision">
+                        <i data-lucide="package-open"></i>
+                        <div>
+                            <h4>AFTER VISION</h4>
+                            <span class="node-status running">RUNNING</span>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow-down"></div>
+
+                    <div class="flow-node" id="node-sizer">
+                        <i data-lucide="cog"></i>
+                        <div>
+                            <h4>ROLLING SIZER</h4>
+                            <span class="node-status running">RUNNING</span>
+                        </div>
+                    </div>
+
+                    <div class="split-row">
+                        <div class="split-branch left-branch">
+                            <div class="flow-node" id="node-small-conv">
+                                <i data-lucide="container"></i>
+                                <div>
+                                    <h4>SMALL CONVEYOR</h4>
+                                    <span class="node-status running">RUNNING</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="split-branch right-branch">
+                            <div class="flow-node" id="node-large-conv">
+                                <i data-lucide="container"></i>
+                                <div>
+                                    <h4>LARGE CONVEYOR</h4>
+                                    <span class="node-status running">RUNNING</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="merge-arrow-down"></div>
+
+                    <div class="flow-node" id="node-gripper">
+                        <i data-lucide="bot"></i>
+                        <div>
+                            <h4>ROBOT GRIPPER</h4>
+                            <span class="node-status running">RUNNING</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bottom-grid">
+                <div class="bottom-panel alarm-summary">
+                    <h3>ACTIVE ALARMS</h3>
+                    <div class="alarm-counters">
+                        <div class="counter-box critical">
+                            <i data-lucide="alert-octagon"></i>
+                            <span class="count-num" id="count-critical">2</span>
+                            <span class="count-label">CRITICAL</span>
+                        </div>
+                        <div class="counter-box warning">
+                            <i data-lucide="alert-triangle"></i>
+                            <span class="count-num" id="count-warning">4</span>
+                            <span class="count-label">WARNING</span>
+                        </div>
+                        <div class="counter-box total">
+                            <i data-lucide="info"></i>
+                            <span class="count-num" id="count-total">6</span>
+                            <span class="count-label">TOTAL ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-panel alarm-list-panel">
+                    <h3>RECENT ALARMS</h3>
+                    <div class="alarm-list" id="alarm-list-container">
+                        </div>
+                </div>
+
+                <div class="bottom-panel quick-actions">
+                    <h3>QUICK ACTIONS</h3>
+                    <div class="action-buttons">
+                        <button class="btn btn-blue" id="btn-ack"><i data-lucide="check-circle"></i> Acknowledge All</button>
+                        <button class="btn btn-purple" id="btn-pause"><i data-lucide="pause-circle"></i> Pause Line</button>
+                        <button class="btn btn-teal" id="btn-reports"><i data-lucide="file-spreadsheet"></i> View Reports</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
