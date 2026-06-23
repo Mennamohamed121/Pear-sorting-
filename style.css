@@ -252,7 +252,7 @@ body {
 
 .digital-twin-panel {
     /* Using a clean relative path instead of the absolute path fixes the space issue instantly */
-background-image: linear-gradient(rgba(11, 19, 32, 0.88), rgba(11, 19, 32, 0.88)), url("C:/Users/Menna Mohamed/Desktop/scada_system - Copy/images/overvieww.jpg");
+background-image: linear-gradient(rgba(11, 19, 32, 0.88), rgba(11, 19, 32, 0.88)), url("overvieww.jpg");
     
     /* Scales the image to fit perfectly inside the card area */
     background-size: cover;
