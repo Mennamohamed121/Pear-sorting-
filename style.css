@@ -251,15 +251,12 @@ body {
 .color-red { color: var(--color-red); }
 
 .digital-twin-panel {
-    /* Using a clean relative path instead of the absolute path fixes the space issue instantly */
-background-image: linear-gradient(rgba(11, 19, 32, 0.88), rgba(11, 19, 32, 0.88)), url("overvieww.jpg");
+    /* Changed to match your exact filename and removed the images/ folder prefix */
+    background-image: linear-gradient(rgba(11, 19, 32, 0.88), rgba(11, 19, 32, 0.88)), url('overvieww.jpg');
     
-    /* Scales the image to fit perfectly inside the card area */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    
-    /* Keeps the original border and structure */
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
