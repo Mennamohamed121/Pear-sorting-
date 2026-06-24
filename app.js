@@ -139,7 +139,11 @@ if (loginForm) {
 // --- EDIT HAPPENED HERE: CHANGED LOCALHOST TO DYNAMIC SERVER IP --
 // =================================================================
 
-// 1. Put your Node-RED computer's IP address here instead of localhost!
+// =================================================================
+// --- SAFE MULTI-STATION HTTP FETCH LOGIC ---
+// =================================================================
+
+// 1. Put your Node-RED computer's IP address here (or 'localhost' if testing locally)
 const serverIP = '192.168.1.154'; 
 
 const stations = [
@@ -152,51 +156,67 @@ const stations = [
     { id: 'node-gripper',     endpoint: 'gripper' }
 ];
 
-// 2. Bind click listeners using the centralized server IP Address
+// 2. Safely bind click listeners
 stations.forEach(station => {
-    const element = document.getElementById(station.id);
-    
-    if (element) {
-        element.style.cursor = 'pointer'; 
+    try {
+        const element = document.getElementById(station.id);
         
-        element.addEventListener('click', () => {
-            console.log(`Connecting to network endpoint: http://${serverIP}:1880/api/${station.endpoint}`);
+        // Only attach if the element actually exists in your HTML layout!
+        if (element) {
+            element.style.cursor = 'pointer'; 
             
-            fetch(`http://${serverIP}:1880/api/${station.endpoint}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Network response error on ${station.endpoint}`);
-                    return response.json(); 
-                })
-                .then(data => {
-                    openPopupModal(data);
-                })
-                .catch(error => {
-                    console.error('Error fetching PLC details:', error);
-                });
-        });
+            element.addEventListener('click', () => {
+                console.log(`Connecting to network endpoint: http://${serverIP}:1880/api/${station.endpoint}`);
+                
+                fetch(`http://${serverIP}:1880/api/${station.endpoint}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Network response error on ${station.endpoint}`);
+                        return response.json(); 
+                    })
+                    .then(data => {
+                        openPopupModal(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching PLC details:', error);
+                    });
+            });
+        } else {
+            console.warn(`Station element with ID "${station.id}" was not found in index.html layout.`);
+        }
+    } catch (err) {
+        console.error(`Failed to initialize station ${station.id}:`, err);
     }
 });
 
 // 3. Function to open the pop-up modal panel view
 function openPopupModal(plcData) {
-    const modal = document.getElementById('station-modal');
-    
-    if (modal) {
-        document.getElementById('modal-station-title').innerText = `${plcData.station || 'STATION'} DETAILS`;
-        document.getElementById('modal-status').innerText = (plcData.status || 'UNKNOWN').toUpperCase();
-        document.getElementById('modal-speed').innerText = `${plcData.speed || 0} RPM`;
-        document.getElementById('modal-temp').innerText = `${plcData.temperature || 0.0} °C`;
-        document.getElementById('modal-current').innerText = `${plcData.current || 0.0} A`;
-        
+    try {
+        const modal = document.getElementById('station-modal');
+        if (!modal) return;
+
+        const titleEl = document.getElementById('modal-station-title');
         const statusEl = document.getElementById('modal-status');
-        statusEl.className = 'modal-value'; 
-        if (plcData.status?.toLowerCase() === 'running') {
-            statusEl.classList.add('status-running');
-        } else {
-            statusEl.style.color = '#ffd600'; 
+        const speedEl = document.getElementById('modal-speed');
+        const tempEl = document.getElementById('modal-temp');
+        const currentEl = document.getElementById('modal-current');
+
+        if (titleEl) titleEl.innerText = `${plcData.station || 'STATION'} DETAILS`;
+        if (statusEl) {
+            statusEl.innerText = (plcData.status || 'UNKNOWN').toUpperCase();
+            statusEl.className = 'modal-value'; 
+            if (plcData.status?.toLowerCase() === 'running') {
+                statusEl.classList.add('status-running');
+            } else {
+                statusEl.style.color = '#ffd600'; 
+            }
         }
+        if (speedEl) speedEl.innerText = `${plcData.speed || 0} RPM`;
+        if (tempEl) tempEl.innerText = `${plcData.temperature || 0.0} °C`;
+        if (currentEl) currentEl.innerText = `${plcData.current || 0.0} A`;
 
         modal.classList.add('show-modal');
+    } catch (err) {
+        console.error("Error displaying modal view window:", err);
     }
 }
 
