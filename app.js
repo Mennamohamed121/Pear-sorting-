@@ -31,6 +31,7 @@ const initialAlarms = [
 
 function renderAlarms(alarms) {
     const container = document.getElementById('alarm-list-container');
+    if (!container) return;
     container.innerHTML = '';
     
     alarms.forEach(alarm => {
@@ -50,7 +51,6 @@ function renderAlarms(alarms) {
 renderAlarms(initialAlarms);
 
 // --- INTERACTIVE SYSTEM & HOOKS FOR YOUR IOT WORK ---
-// Call this function with payload items arriving from fetch/WebSockets/MQTT
 function updateIoTData(payload) {
     if (payload.health) document.getElementById('kpi-health').textContent = payload.health + '%';
     if (payload.oee) document.getElementById('kpi-oee').textContent = payload.oee + '%';
@@ -104,9 +104,8 @@ if (mergeContainer) {
         <div class="final-drop-arrow"></div>
     `;
 }
-// --- OPERATOR SIGN-IN ROUTINE (MULTIPLE OPERATORS) ---
 
-// 1. Define an array of authorized operator usernames
+// --- OPERATOR SIGN-IN ROUTINE (MULTIPLE OPERATORS) ---
 const ALLOWED_OPERATORS = ["menna", "youssef"]; 
 const OPERATOR_PASS = "1234";
 
@@ -114,28 +113,97 @@ const loginGate = document.getElementById('login-gate');
 const loginForm = document.getElementById('login-form');
 const errorMsg = document.getElementById('login-error');
 
-// Check if a user has already authenticated during this browser session
 if (sessionStorage.getItem('isOperatorAuthenticated') === 'true') {
-    loginGate.classList.add('hidden');
+    if (loginGate) loginGate.classList.add('hidden');
 }
 
-// Handle login submissions
-loginForm.addEventListener('submit', function(e) {
-    e.preventDefault(); // Stop default page refresh trigger
+if (loginForm) {
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        
+        const inputUser = document.getElementById('username').value.trim().toLowerCase();
+        const inputPass = document.getElementById('password').value;
+        
+        if (ALLOWED_OPERATORS.includes(inputUser) && inputPass === OPERATOR_PASS) {
+            sessionStorage.setItem('isOperatorAuthenticated', 'true');
+            if (loginGate) loginGate.classList.add('hidden');
+            if (errorMsg) errorMsg.style.display = 'none';
+        } else {
+            if (errorMsg) errorMsg.style.display = 'block';
+            document.getElementById('password').value = ''; 
+        }
+    });
+}
+
+// =================================================================
+// --- EDIT HAPPENED HERE: CHANGED LOCALHOST TO DYNAMIC SERVER IP --
+// =================================================================
+
+// 1. Put your Node-RED computer's IP address here instead of localhost!
+const serverIP = '192.168.1.154'; 
+
+const stations = [
+    { id: 'node-loading',     endpoint: 'loading' },
+    { id: 'node-vision',      endpoint: 'vision' },
+    { id: 'node-aftervision', endpoint: 'aftervision' },
+    { id: 'node-sizer',       endpoint: 'sizer' },
+    { id: 'node-small',       endpoint: 'small_conveyor' },
+    { id: 'node-large',       endpoint: 'large_conveyor' },
+    { id: 'node-gripper',     endpoint: 'gripper' }
+];
+
+// 2. Bind click listeners using the centralized server IP Address
+stations.forEach(station => {
+    const element = document.getElementById(station.id);
     
-    // .toLowerCase() ensures it works even if they type "Menna" or "Youssef" with capitals
-    const inputUser = document.getElementById('username').value.trim().toLowerCase();
-    const inputPass = document.getElementById('password').value;
-    
-    // 2. Check if the username exists in our array AND the password matches
-    if (ALLOWED_OPERATORS.includes(inputUser) && inputPass === OPERATOR_PASS) {
-        // Correct combination -> Hide gate and store session token
-        sessionStorage.setItem('isOperatorAuthenticated', 'true');
-        loginGate.classList.add('hidden');
-        errorMsg.style.display = 'none';
-    } else {
-        // Wrong combination -> Flash notification alert
-        errorMsg.style.display = 'block';
-        document.getElementById('password').value = ''; // Clear password field
+    if (element) {
+        element.style.cursor = 'pointer'; 
+        
+        element.addEventListener('click', () => {
+            console.log(`Connecting to network endpoint: http://${serverIP}:1880/api/${station.endpoint}`);
+            
+            fetch(`http://${serverIP}:1880/api/${station.endpoint}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Network response error on ${station.endpoint}`);
+                    return response.json(); 
+                })
+                .then(data => {
+                    openPopupModal(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching PLC details:', error);
+                });
+        });
     }
 });
+
+// 3. Function to open the pop-up modal panel view
+function openPopupModal(plcData) {
+    const modal = document.getElementById('station-modal');
+    
+    if (modal) {
+        document.getElementById('modal-station-title').innerText = `${plcData.station || 'STATION'} DETAILS`;
+        document.getElementById('modal-status').innerText = (plcData.status || 'UNKNOWN').toUpperCase();
+        document.getElementById('modal-speed').innerText = `${plcData.speed || 0} RPM`;
+        document.getElementById('modal-temp').innerText = `${plcData.temperature || 0.0} °C`;
+        document.getElementById('modal-current').innerText = `${plcData.current || 0.0} A`;
+        
+        const statusEl = document.getElementById('modal-status');
+        statusEl.className = 'modal-value'; 
+        if (plcData.status?.toLowerCase() === 'running') {
+            statusEl.classList.add('status-running');
+        } else {
+            statusEl.style.color = '#ffd600'; 
+        }
+
+        modal.classList.add('show-modal');
+    }
+}
+
+// 4. Global function to dismiss the modal view
+window.closePopupModal = function() {
+    const modal = document.getElementById('station-modal');
+    if (modal) {
+        modal.classList.remove('show-modal');
+    }
+};
